@@ -1,0 +1,15 @@
+{
+    "status": "SAFE",
+    "risk_level": "SAFE",
+    "action": "ALLOW",
+    "pred_before": 6,
+    "pred_after": 6,
+    "conf_before": 0.9149878621101379,
+    "conf_after": 0.8992030024528503,
+    "confidence_drop": 0.015784859657287598,
+    "file_hash": null,
+    "cid": null,
+    "ipfs_url": null,
+    "tx_hash": null,
+    "timestamp": "2026-04-15 00:12:40"
+}

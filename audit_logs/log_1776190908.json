@@ -1,0 +1,15 @@
+{
+    "status": "ATTACK",
+    "risk_level": "HIGH",
+    "action": "STORE_BLOCKCHAIN",
+    "pred_before": 3,
+    "pred_after": 4,
+    "conf_before": 0.8430594205856323,
+    "conf_after": 0.917548656463623,
+    "confidence_drop": 0.07448923587799072,
+    "file_hash": "cb843b8288eec9af8b65933e5140d05edc54e2490d5848953ad2336727290d15",
+    "cid": "QmcJ9fWt5HBbxmqTwhjgLHHSRdVuNQjnzE4JQ67pUEnpdV",
+    "ipfs_url": "https://ipfs.io/ipfs/QmcJ9fWt5HBbxmqTwhjgLHHSRdVuNQjnzE4JQ67pUEnpdV",
+    "tx_hash": "932123bb37bb9ad583883c0a491b8e7b7f5304fb2640d0f21abd7cc0782ab765",
+    "timestamp": "2026-04-14 23:51:48"
+}

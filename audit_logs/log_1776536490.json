@@ -1,0 +1,18 @@
+{
+    "status": "SAFE",
+    "risk_level": "SAFE",
+    "action": "ALLOW",
+    "pred_before": 3,
+    "pred_after": 3,
+    "conf_before": 0.34730130434036255,
+    "conf_after": 0.37090981006622314,
+    "confidence_drop": 0.023608505725860596,
+    "entropy_before": 1.8506418466567993,
+    "entropy_after": 1.8283421993255615,
+    "entropy_increase": -0.022299647331237793,
+    "file_hash": null,
+    "cid": null,
+    "ipfs_url": null,
+    "tx_hash": null,
+    "timestamp": "2026-04-18 23:51:30"
+}

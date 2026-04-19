@@ -1,0 +1,15 @@
+{
+    "status": "ATTACK",
+    "risk_level": "HIGH",
+    "action": "STORE_BLOCKCHAIN",
+    "pred_before": 6,
+    "pred_after": 4,
+    "conf_before": 0.9149878621101379,
+    "conf_after": 0.9998008608818054,
+    "confidence_drop": 0.08481299877166748,
+    "file_hash": null,
+    "cid": null,
+    "ipfs_url": null,
+    "tx_hash": null,
+    "timestamp": "2026-04-15 00:18:12"
+}

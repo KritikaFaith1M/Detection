@@ -1,0 +1,15 @@
+{
+    "status": "ALERT",
+    "risk_level": "LOW",
+    "action": "LOG_ONLY",
+    "pred_before": 6,
+    "pred_after": 6,
+    "conf_before": 0.9999992847442627,
+    "conf_after": 0.9999997615814209,
+    "confidence_drop": 4.76837158203125e-07,
+    "file_hash": "6cfbe4ca868b7da43a30545c2011658082ebf2c63680b221d9adbc9228f31192",
+    "cid": "QmPQuvCnet7ZtPmULiKT8Vr4SBKKqxoPDz9By98zGisYPx",
+    "ipfs_url": "https://ipfs.io/ipfs/QmPQuvCnet7ZtPmULiKT8Vr4SBKKqxoPDz9By98zGisYPx",
+    "tx_hash": null,
+    "timestamp": "2026-04-15 00:31:26"
+}

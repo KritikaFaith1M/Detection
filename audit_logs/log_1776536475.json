@@ -1,0 +1,18 @@
+{
+    "status": "ALERT",
+    "risk_level": "LOW",
+    "action": "LOG_ONLY",
+    "pred_before": 8,
+    "pred_after": 8,
+    "conf_before": 0.9628865718841553,
+    "conf_after": 0.9293466210365295,
+    "confidence_drop": 0.03353995084762573,
+    "entropy_before": 0.19351744651794434,
+    "entropy_after": 0.3274274170398712,
+    "entropy_increase": 0.13390997052192688,
+    "file_hash": "eaec54ee1aed958f9548d01aff16c41aeba408885da42759890a538888be879e",
+    "cid": "QmQokniheQ5DEdi5KqEWcZSsGBLDkUpUZLyDhJ92Ddhumk",
+    "ipfs_url": "https://ipfs.io/ipfs/QmQokniheQ5DEdi5KqEWcZSsGBLDkUpUZLyDhJ92Ddhumk",
+    "tx_hash": null,
+    "timestamp": "2026-04-18 23:51:15"
+}
