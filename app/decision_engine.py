@@ -3,7 +3,7 @@ class DecisionEngine:
 
         if d["is_adversarial"]:
 
-            # 🔥 HIGH RISK (PGD / strong attacks)
+           
             if (
                 d["confidence_drop"] > 0.15 or
                 d["entropy_increase"] > 0.05 or
@@ -15,7 +15,7 @@ class DecisionEngine:
                     "action": "STORE_BLOCKCHAIN"
                 }
 
-            # ⚠️ MEDIUM RISK
+          
             elif d["confidence_drop"] > 0.05:
                 return {
                     "status": "ALERT",
@@ -23,7 +23,6 @@ class DecisionEngine:
                     "action": "STORE_IPFS"
                 }
 
-            # 🟡 LOW RISK
             else:
                 return {
                     "status": "ALERT",

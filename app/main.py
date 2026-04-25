@@ -17,7 +17,7 @@ from app.decision_engine import DecisionEngine
 from utils.hashing import generate_hash
 from utils.logger import AuditLogger
 
-USE_BLOCKCHAIN = False   # True = real blockchain, False = simulated
+USE_BLOCKCHAIN = False   # True = real blockchain, False = simulated (here toggling)
 USE_IPFS = False         # optional
 
 class AdversarialSystem:

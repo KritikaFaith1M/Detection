@@ -9,7 +9,7 @@ class AdversarialDetector:
         self.device = device
         self.model.eval()
 
-        # AUTOENCODER
+        
         self.autoencoder = Autoencoder().to(device)
         self.autoencoder.load_state_dict(
             torch.load("models/saved/autoencoder.pth", map_location=device)
@@ -80,33 +80,29 @@ class AdversarialDetector:
             if pred.item() != pred1.item():
                 unstable_count += 1
 
-        # -------------------------------
-        # -------------------------------
-        # FINAL DEMO-STABLE DETECTION 🔥
-        # -------------------------------
         is_adv = False
         
-        # 1. Prediction change
+    
         if pred1.item() != pred2.item():
             is_adv = True
         
-        # 2. Confidence drop
+        
         elif drop > 0.02:
             is_adv = True
         
-        # 3. Entropy increase
+        
         elif entropy_increase > 0.01:
             is_adv = True
         
-        # 4. Multi-noise instability
+        
         elif unstable_count >= 1:
             is_adv = True
         
-        # 5. VERY IMPORTANT (PGD FIX 🔥)
+        
         elif conf1.item() > 0.85 and recon_error > 0.003:
             is_adv = True
         
-        # 6. Low confidence
+    
         elif conf1.item() < 0.4:
             is_adv = True
             
