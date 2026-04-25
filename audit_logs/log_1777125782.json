@@ -1,0 +1,21 @@
+{
+    "timestamp": "2026-04-25 19:33:02",
+    "status": "ALERT",
+    "risk_level": "LOW",
+    "action": "LOG_ONLY",
+    "pred_before": 3,
+    "pred_after": 3,
+    "conf_before": 0.34730130434036255,
+    "conf_after": 0.35114020109176636,
+    "confidence_drop": 0.0038388967514038086,
+    "entropy_before": 1.8506418466567993,
+    "entropy_after": 1.8467276096343994,
+    "entropy_increase": -0.003914237022399902,
+    "reconstruction_error": 0.011549849063158035,
+    "cleaned_prediction": 3,
+    "cleaned_confidence": 0.4114791452884674,
+    "file_hash": "0faf435b02d83b0498e7466331764cd04fd930dd070ba7daa93c1b468cd003df",
+    "cid": "SIMULATED_CID_0faf435b",
+    "ipfs_url": "https://ipfs.io/ipfs/SIMULATED_CID_0faf435b",
+    "tx_hash": null
+}

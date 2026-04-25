@@ -1,0 +1,21 @@
+{
+    "timestamp": "2026-04-25 19:36:56",
+    "status": "SAFE",
+    "risk_level": "SAFE",
+    "action": "ALLOW",
+    "pred_before": 3,
+    "pred_after": 3,
+    "conf_before": 0.5746449828147888,
+    "conf_after": 0.5657229423522949,
+    "confidence_drop": 0.008922040462493896,
+    "entropy_before": 0.769278883934021,
+    "entropy_after": 0.7756544351577759,
+    "entropy_increase": 0.006375551223754883,
+    "reconstruction_error": 0.00126990070566535,
+    "cleaned_prediction": null,
+    "cleaned_confidence": null,
+    "file_hash": null,
+    "cid": null,
+    "ipfs_url": null,
+    "tx_hash": null
+}

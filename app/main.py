@@ -15,16 +15,16 @@ from models.classifier import load_model
 from app.detector import AdversarialDetector
 from app.decision_engine import DecisionEngine
 from utils.hashing import generate_hash
-from utils.ipfs import IPFSClient
 from utils.logger import AuditLogger
-from app.blockchain_client import AppBlockchain
 
+USE_BLOCKCHAIN = False   # True = real blockchain, False = simulated
+USE_IPFS = False         # optional
 
 class AdversarialSystem:
     def __init__(self, model_path):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        print(f"🚀 Using Device: {self.device}")
+        print(f" Using Device: {self.device}")
 
         # LOAD MODEL
         self.model = load_model(model_path, self.device)
@@ -33,11 +33,9 @@ class AdversarialSystem:
         self.detector = AdversarialDetector(self.model, self.device)
 
         self.decision_engine = DecisionEngine()
-        self.ipfs = IPFSClient()
         self.logger = AuditLogger()
-        self.blockchain = AppBlockchain()
 
-        # TRANSFORM (IMPROVED)
+        # TRANSFORM
         self.transform = transforms.Compose([
             transforms.Resize((32, 32)),
             transforms.CenterCrop(32),
@@ -49,7 +47,7 @@ class AdversarialSystem:
         print(f"\n🖼 Processing Image: {image_path}")
 
         if not os.path.exists(image_path):
-            print("❌ Image not found!")
+            print(" Image not found!")
             return None
 
         image = Image.open(image_path).convert("RGB")
@@ -68,13 +66,13 @@ class AdversarialSystem:
         )
 
         # -------------------------------
-        # AUTOENCODER CLEAN + RECHECK ✅
+        # OPTIONAL CLEANING (SAFE)
         # -------------------------------
         cleaned_pred = None
         cleaned_conf = None
 
         if detection["is_adversarial"]:
-            print("🧼 Cleaning image using Autoencoder...")
+            print(" Cleaning image using Autoencoder...")
 
             with torch.no_grad():
                 cleaned = self.detector.autoencoder(image_tensor)
@@ -84,7 +82,7 @@ class AdversarialSystem:
                 cleaned_conf, cleaned_pred = torch.max(prob_cleaned, 1)
 
             print(
-                f"🧽 Cleaned Prediction: {cleaned_pred.item()}, "
+                f" Cleaned Prediction: {cleaned_pred.item()}, "
                 f"Confidence: {cleaned_conf.item():.4f}"
             )
 
@@ -93,50 +91,52 @@ class AdversarialSystem:
         # -------------------------------
         decision = self.decision_engine.evaluate(detection)
 
-        print(f"🔍 Status: {decision['status']}")
-        print(f"⚠️ Risk Level: {decision['risk_level']}")
-        print(f"⚙️ Action: {decision['action']}")
+        print(f" Status: {decision['status']}")
+        print(f" Risk Level: {decision['risk_level']}")
+        print(f" Action: {decision['action']}")
 
+        # -------------------------------
+        # SAFE VARIABLES (NO IPFS/BLOCKCHAIN)
+        # -------------------------------
         cid = None
         ipfs_url = None
         tx_hash = None
         file_hash = None
 
         # -------------------------------
-        # SECURITY ACTIONS
+        # SECURITY ACTIONS (SIMPLIFIED)
         # -------------------------------
         if decision["status"] == "ALERT":
-
             file_hash = generate_hash(image_path)
-            print(f"🔐 File Hash: {file_hash}")
-
-            try:
-                cid, ipfs_url = self.ipfs.upload(image_path)
-
-                if cid:
-                    print(f"🌐 IPFS CID: {cid}")
-                    print(f"🔗 URL: {ipfs_url}")
-                else:
-                    print("❌ IPFS Upload Failed")
-
-            except Exception as e:
-                print(f"❌ IPFS Error: {e}")
-                cid = None
-
-            if cid and decision["risk_level"] == "HIGH":
+            print(f" File Hash: {file_hash}")
+            
+            #IPFS --optional 
+            if USE_IPFS:
                 try:
-                    tx_hash = self.blockchain.store(cid, decision["risk_level"])
-
-                    if tx_hash:
-                        print(f"⛓ Blockchain TX: {tx_hash}")
-                    else:
-                        print("❌ Blockchain failed")
-
-                except Exception as e:
-                    print(f"❌ Blockchain Error: {e}")
-
+                    cid, ipfs_url = self.ipfs.upload(image_path)
+                    print(f"IPFS CID: {cid}")
+                except:
+                    cid = None
+                    ipfs_url = None
+            else:
+                cid = "SIMULATED_CID_" + file_hash[:8]
+                ipfs_url = "https://ipfs.io/ipfs/" + cid
         # -------------------------------
-        # LOG DATA (IMPROVED)
+            # BLOCKCHAIN (IMPORTANT 🔥)
+            # -------------------------------
+            if decision["risk_level"] == "HIGH":
+        
+                if USE_BLOCKCHAIN:
+                    try:
+                        tx_hash = self.blockchain.store(cid, decision["risk_level"])
+                    except:
+                        tx_hash = None
+                else:
+                    tx_hash = "SIMULATED_TX_" + file_hash[:10]
+                    print(f"🔗 Simulated Blockchain TX: {tx_hash}")                    
+        
+        # -------------------------------
+        # LOG DATA
         # -------------------------------
         log_data = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -169,7 +169,7 @@ class AdversarialSystem:
 
         log_path = self.logger.save_log(log_data)
 
-        print(f"📄 Log saved at: {log_path}")
+        print(f" Log saved at: {log_path}")
 
         return log_data
 
@@ -184,5 +184,5 @@ if __name__ == "__main__":
 
     result = system.process_image(test_image)
 
-    print("\n📊 FINAL RESULT:")
+    print("\n FINAL RESULT:")
     print(result)

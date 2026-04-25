@@ -1,0 +1,6 @@
+torch
+torchvision
+streamlit
+pillow
+web3
+ipfshttpclient

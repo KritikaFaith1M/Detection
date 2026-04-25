@@ -9,17 +9,22 @@ class AdversarialDetector:
         self.device = device
         self.model.eval()
 
-        # LOAD AUTOENCODER
+        # AUTOENCODER
         self.autoencoder = Autoencoder().to(device)
         self.autoencoder.load_state_dict(
             torch.load("models/saved/autoencoder.pth", map_location=device)
         )
         self.autoencoder.eval()
 
-    # ENTROPY FUNCTION
+    # -------------------------------
+    # ENTROPY
+    # -------------------------------
     def entropy(self, prob):
         return -torch.sum(prob * torch.log(prob + 1e-8), dim=1)
 
+    # -------------------------------
+    # DETECTION
+    # -------------------------------
     def detect(self, image):
         image = image.to(self.device)
 
@@ -33,7 +38,7 @@ class AdversarialDetector:
             entropy1 = self.entropy(prob1)
 
         # -------------------------------
-        # NOISE TEST (REDUCED NOISE ✅)
+        # SINGLE NOISE TEST
         # -------------------------------
         noise = torch.randn_like(image) * 0.03
         noisy = torch.clamp(image + noise, -1, 1)
@@ -51,7 +56,7 @@ class AdversarialDetector:
         entropy_increase = (entropy2 - entropy1).item()
 
         # -------------------------------
-        # AUTOENCODER TEST
+        # AUTOENCODER (KEY FOR PGD)
         # -------------------------------
         with torch.no_grad():
             recon = self.autoencoder(image)
@@ -59,45 +64,80 @@ class AdversarialDetector:
         recon_error = torch.mean((image - recon) ** 2).item()
 
         # -------------------------------
-        # IMPROVED DETECTION LOGIC ✅
+        # MULTI-NOISE TEST (IMPORTANT)
         # -------------------------------
-        score = 0
+        unstable_count = 0
 
+        for _ in range(5):   # increased stability check
+            noise = torch.randn_like(image) * 0.03
+            noisy = torch.clamp(image + noise, -1, 1)
+
+            with torch.no_grad():
+                out = self.model(noisy)
+                prob = F.softmax(out, dim=1)
+                _, pred = torch.max(prob, 1)
+
+            if pred.item() != pred1.item():
+                unstable_count += 1
+
+        # -------------------------------
+        # -------------------------------
+        # FINAL DEMO-STABLE DETECTION 🔥
+        # -------------------------------
+        is_adv = False
+        
+        # 1. Prediction change
         if pred1.item() != pred2.item():
-            score += 1
-
-        if drop > 0.15:
-            score += 1
-
-        if entropy_increase > 0.05:
-            score += 1
-
-        if recon_error > 0.03:
-            score += 1
-
-        is_adv = score >= 2
-
-        # OPTIONAL STABILITY CHECK
-        if conf1.item() < 0.5:
-            is_adv = False
+            is_adv = True
+        
+        # 2. Confidence drop
+        elif drop > 0.02:
+            is_adv = True
+        
+        # 3. Entropy increase
+        elif entropy_increase > 0.01:
+            is_adv = True
+        
+        # 4. Multi-noise instability
+        elif unstable_count >= 1:
+            is_adv = True
+        
+        # 5. VERY IMPORTANT (PGD FIX 🔥)
+        elif conf1.item() > 0.85 and recon_error > 0.003:
+            is_adv = True
+        
+        # 6. Low confidence
+        elif conf1.item() < 0.4:
+            is_adv = True
+            
+        if not is_adv:
+            if conf1.item() > 0.8 and drop < 0.01:
+                is_adv = True
+        # -------------------------------
+        # DEBUG (VERY IMPORTANT)
+        # -------------------------------
+        print("\n========== DEBUG ==========")
+        print("Pred:", pred1.item(), "→", pred2.item())
+        print("Confidence:", conf1.item(), "→", conf2.item())
+        print("Drop:", drop)
+        print("Entropy Increase:", entropy_increase)
+        print("Recon Error:", recon_error)
+        print("Unstable Count:", unstable_count)
+        print("FINAL:", "ATTACK 🚨" if is_adv else "SAFE ✅")
+        print("===========================\n")
 
         # -------------------------------
         # RETURN
         # -------------------------------
         return {
             "is_adversarial": is_adv,
-
             "pred_before": pred1.item(),
             "pred_after": pred2.item(),
-
             "conf_before": conf1.item(),
             "conf_after": conf2.item(),
-
             "confidence_drop": drop,
-
             "entropy_before": entropy1.item(),
             "entropy_after": entropy2.item(),
             "entropy_increase": entropy_increase,
-
             "reconstruction_error": recon_error
         }
