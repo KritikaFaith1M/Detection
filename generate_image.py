@@ -52,7 +52,7 @@ def fgsm_attack(model, image, label, eps=0.2):
     adv = image + eps * image.grad.sign()
     return torch.clamp(adv, -1, 1).detach()
 
-def pgd_attack(model, image, label, eps=0.3, alpha=0.01, iters=10):
+def pgd_attack(model, image, label, eps=0.4, alpha=0.02, iters=20):
     ori = image.clone()
 
     for _ in range(iters):

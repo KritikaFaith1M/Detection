@@ -2,6 +2,9 @@ import torch
 import torch.nn.functional as F
 from models.autoencoder import Autoencoder
 
+# Make deterministic
+torch.manual_seed(42)
+
 
 class AdversarialDetector:
     def __init__(self, model, device="cpu"):
@@ -9,22 +12,16 @@ class AdversarialDetector:
         self.device = device
         self.model.eval()
 
-        
+        # Autoencoder (optional, only for logging)
         self.autoencoder = Autoencoder().to(device)
         self.autoencoder.load_state_dict(
             torch.load("models/saved/autoencoder.pth", map_location=device)
         )
         self.autoencoder.eval()
 
-    # -------------------------------
-    # ENTROPY
-    # -------------------------------
     def entropy(self, prob):
         return -torch.sum(prob * torch.log(prob + 1e-8), dim=1)
 
-    # -------------------------------
-    # DETECTION
-    # -------------------------------
     def detect(self, image):
         image = image.to(self.device)
 
@@ -38,9 +35,9 @@ class AdversarialDetector:
             entropy1 = self.entropy(prob1)
 
         # -------------------------------
-        # SINGLE NOISE TEST
+        # FIXED NOISE TEST (DETERMINISTIC)
         # -------------------------------
-        noise = torch.randn_like(image) * 0.03
+        noise = torch.ones_like(image) * 0.02
         noisy = torch.clamp(image + noise, -1, 1)
 
         with torch.no_grad():
@@ -56,7 +53,7 @@ class AdversarialDetector:
         entropy_increase = (entropy2 - entropy1).item()
 
         # -------------------------------
-        # AUTOENCODER (KEY FOR PGD)
+        # AUTOENCODER (FOR LOG ONLY)
         # -------------------------------
         with torch.no_grad():
             recon = self.autoencoder(image)
@@ -64,62 +61,38 @@ class AdversarialDetector:
         recon_error = torch.mean((image - recon) ** 2).item()
 
         # -------------------------------
-        # MULTI-NOISE TEST (IMPORTANT)
+        # FINAL STABLE DETECTION LOGIC
         # -------------------------------
-        unstable_count = 0
-
-        for _ in range(5):   # increased stability check
-            noise = torch.randn_like(image) * 0.03
-            noisy = torch.clamp(image + noise, -1, 1)
-
-            with torch.no_grad():
-                out = self.model(noisy)
-                prob = F.softmax(out, dim=1)
-                _, pred = torch.max(prob, 1)
-
-            if pred.item() != pred1.item():
-                unstable_count += 1
-
         is_adv = False
-        
-    
+
+        # 1. Prediction change (strongest)
         if pred1.item() != pred2.item():
             is_adv = True
-        
-        
+
+        # 2. Confidence drop
         elif drop > 0.02:
             is_adv = True
-        
-        
-        elif entropy_increase > 0.01:
+
+        # 3. Entropy increase
+        elif entropy_increase > 0.02:
             is_adv = True
-        
-        
-        elif unstable_count >= 1:
-            is_adv = True
-        
-        
-        elif conf1.item() > 0.85 and recon_error > 0.003:
-            is_adv = True
-        
-    
+
+        # 4. Low confidence safeguard
         elif conf1.item() < 0.4:
             is_adv = True
             
-        if not is_adv:
-            if conf1.item() > 0.8 and drop < 0.01:
-                is_adv = True
+        elif conf1.item() < 0.92 and drop > 0.002:
+            is_adv = True
         # -------------------------------
-        # DEBUG (VERY IMPORTANT)
+        # DEBUG OUTPUT
         # -------------------------------
         print("\n========== DEBUG ==========")
-        print("Pred:", pred1.item(), "→", pred2.item())
-        print("Confidence:", conf1.item(), "→", conf2.item())
+        print("Pred:", pred1.item(), "->", pred2.item())
+        print("Confidence:", conf1.item(), "->", conf2.item())
         print("Drop:", drop)
         print("Entropy Increase:", entropy_increase)
         print("Recon Error:", recon_error)
-        print("Unstable Count:", unstable_count)
-        print("FINAL:", "ATTACK 🚨" if is_adv else "SAFE ✅")
+        print("Final Decision:", "ATTACK" if is_adv else "SAFE")
         print("===========================\n")
 
         # -------------------------------
